@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bingo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .current-space {
+            margin-top: 20px;
+        }
+        .current-space img {
+            height: 50vh; /* Set height to 50% of the viewport height */
+            max-width: 80%; /* Ensure the width doesn't exceed 80% of the container */
+            border: 5px solid black;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            object-fit: contain; /* Ensures the image scales without distortion */
+        }
+        .history {
+            margin-top: 30px;
+        }
+        .history img {
+            width: 80px;
+            height: 80px;
+            margin: 5px;
+            border: 1px solid black;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #reset-button {
+            margin-top: 10px;
+            background-color: #dc3545;
+        }
+        #reset-button:hover {
+            background-color: #a71d2a;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bingo Time!</h1>
+    <button id="draw-button" onClick="drawNextSpace()">Draw Next Space</button>
+    <button id="reset-button" onClick="resetDraws()">Reset Draws</button>
+    <div class="current-space">
+        <h2>Current Draw</h2>
+        <div id="current-space-container">
+            <p>No draw yet.</p>
+        </div>
+    </div>   
+    <div class="history">
+        <h2>Previous Draws</h2>
+        <div id="history-container"></div>
+    </div>
+
+    <script src="bingoList.js">
+        // This loads a premade JSON object with a list of Bingo spaces
+    </script>
+
+    <script>
+        const bingoSpacesDir = "./bingo_spaces"; // Directory containing the images
+        
+        let history = [];
+
+        function shuffleSpaces() {
+            shuffleArray(availableSpaces); // Randomize the array initially
+            availableSpaces.push("center.png");
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function drawNextSpace() {
+            if (availableSpaces.length === 0) {
+                alert("No more spaces to draw!");
+                return;
+            }
+
+            const nextSpace = availableSpaces.pop(); // Get the next space
+            history.push(nextSpace);
+
+            // Update the current space
+            const currentSpaceContainer = document.getElementById("current-space-container");
+            currentSpaceContainer.innerHTML = `<img src="${bingoSpacesDir}/${nextSpace}" alt="Bingo Space">`;
+
+            // Update the history
+            const historyContainer = document.getElementById("history-container");
+            historyContainer.innerHTML = history
+                .slice(0, -1) // Exclude the current space
+                .map(space => `<img src="${bingoSpacesDir}/${space}" alt="Bingo Space">`)
+                .join("");
+        }
+
+        function resetDraws() {
+            const confirmed = confirm("Are you sure you want to reset all draws? This action cannot be undone.");
+            if (!confirmed) return;
+
+            availableSpaces = [...history, ...availableSpaces].filter(space => space !== "center.png");
+             // Restore history to available
+
+            shuffleSpaces();
+            
+            history = [];
+
+            // Clear the UI
+            document.getElementById("current-space-container").innerHTML = `<p>No draw yet.</p>`;
+            document.getElementById("history-container").innerHTML = "";
+        }
+
+        // Shuffle the bingo spaces on load
+        shuffleSpaces();
+    </script>
+</body>
+</html>
